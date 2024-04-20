@@ -24,13 +24,13 @@ export default function PassField({ value, onChange }: PassFieldProps) {
 
     return (
         <div>
-            <FormControl variant="outlined">
+            <FormControl variant="outlined" sx={{width: '96%'}}>
                 <InputLabel>パスワード</InputLabel>
                 <OutlinedInput
                     id="pass"
                     type={showPassword ? 'text' : 'password'}
-                    value={value}  // 親コンポーネントから受け取ったvalueを設定
-                    onChange={onChange}  // 親コンポーネントから受け取ったonChangeを設定
+                    value={value} 
+                    onChange={onChange}
                     endAdornment={
                         <InputAdornment position="end">
                             <IconButton
