@@ -1,7 +1,9 @@
-export default function Login(){
+import Login from "@/libs/components/login/Login"
+
+export default function LoginPage(){
     return (
         <div className="flex flex-col justify-center items-center h-screen">
-            <p>Login Page</p>
+            <Login />
         </div>
     )
 }
