@@ -1,5 +1,3 @@
-'use client'
-
 import * as React from 'react';
 import {
     FormControl,
@@ -10,7 +8,12 @@ import {
 } from "@mui/material"
 import { Visibility, VisibilityOff } from '@mui/icons-material/';
 
-export default function PassField() {
+interface PassFieldProps {
+    value: string;
+    onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+}
+
+export default function PassField({ value, onChange }: PassFieldProps) {
     const [showPassword, setShowPassword] = React.useState(false);
 
     const handleClickShowPassword = () => setShowPassword((show) => !show);
@@ -26,6 +29,8 @@ export default function PassField() {
                 <OutlinedInput
                     id="pass"
                     type={showPassword ? 'text' : 'password'}
+                    value={value}  // 親コンポーネントから受け取ったvalueを設定
+                    onChange={onChange}  // 親コンポーネントから受け取ったonChangeを設定
                     endAdornment={
                         <InputAdornment position="end">
                             <IconButton
