@@ -3,6 +3,9 @@
 import { TextField, Button, Card, CardContent, Grid, Typography } from "@mui/material"
 import PassField from "../PassField"
 import { useState } from "react";
+import { auth, firestore } from '../firebase/firebase'; // パスは貴様の環境に合わせて変更すること
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc } from 'firebase/firestore';
 
 export default function SignUp() {
     const [name, setName] = useState('');
@@ -10,14 +13,32 @@ export default function SignUp() {
     const [password, setPassword] = useState('');
     const [emailError, setEmailError] = useState(false);
 
-    const handleClick = () => {
+    const handleClick = async () => {
         const data = {
             name: name,
             email: email,
             password: password
         };
 
-        // ユーザーが入力した値をどうこうする
+        if (!email || !password) {
+            setEmailError(true);
+            return; // メールアドレスやパスワードが空の場合はここで処理を止める
+        }
+        try {
+            const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+            await setDoc(doc(firestore, "users", user.uid), {
+                nickname: name,
+                email: email,
+            });
+            console.log("アカウント作成成功:", userCredential.user);
+            // サインアップ後の処理をここに書く（例：ダッシュボードページにリダイレクト等）
+        } catch (error) {
+            const firebaseError = error as Error; // エラーをErrorとして扱う
+            console.error("アカウント作成エラー:", firebaseError.message); // firebaseError.message でエラーメッセージを参照
+            // エラー処理をここに書く（例：エラーメッセージを表示）
+        }
+
 
     };
 
@@ -34,12 +55,11 @@ export default function SignUp() {
                         <Typography variant="h6" fontWeight="fontWeightBold">
                             アカウントを作成
                         </Typography>
-
                         <TextField
                             id="name"
                             label="名前"
                             variant="outlined"
-                            sx={{width: '96%'}}
+                            sx={{ width: '96%' }}
                             margin="normal"
                             value={name}
                             onChange={(e) => setName(e.target.value)}
@@ -49,12 +69,12 @@ export default function SignUp() {
                             id="email"
                             label="メールアドレス"
                             variant="outlined"
-                            sx={{ mb: 1, width: '96%'}}
+                            sx={{ mb: 1, width: '96%' }}
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             onBlur={validateEmail}
                             error={emailError}
-                            helperText={emailError ? 'メールアドレスを入力してください' : ''}
+                            helperText={emailError ? '正しいメールアドレスを入力してください' : ''}
                         />
                         <PassField value={password} onChange={(e) => setPassword(e.target.value)} />
 
@@ -70,5 +90,5 @@ export default function SignUp() {
                 </Card>
             </Grid>
         </div>
-    )
+    );
 }
