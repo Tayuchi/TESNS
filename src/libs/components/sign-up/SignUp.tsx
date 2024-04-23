@@ -1,11 +1,12 @@
 'use client'
 
-import { TextField, Button, Card, CardContent, Grid, Typography } from "@mui/material"
+import { TextField, Button, Card, CardContent, Grid, Typography, colors } from "@mui/material"
 import PassField from "../PassField"
 import { useState } from "react";
 import { auth, firestore } from '../firebase/firebase'; // パスは貴様の環境に合わせて変更すること
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
+import Link from "next/link";
 
 export default function SignUp() {
     const [name, setName] = useState('');
@@ -79,13 +80,18 @@ export default function SignUp() {
                         <PassField value={password} onChange={(e) => setPassword(e.target.value)} />
 
                         <Button
-                            sx={{ mt: 2, width: '96%' }}
+                            sx={{ mt: 2, mb: 2, width: '96%' }}
                             onClick={handleClick}
                             color="primary"
                             variant="contained"
                         >
                             アカウントを作成する
                         </Button>
+
+                        <Link href="/login" style={{ color: '#1d9bf0'}}>
+                            ログインする
+                        </Link>
+
                     </CardContent>
                 </Card>
             </Grid>
