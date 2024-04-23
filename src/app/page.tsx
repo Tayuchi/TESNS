@@ -12,7 +12,6 @@ export default function Home() {
           <Grid item xs={2}>test</Grid>
         </Grid>
       </Box>
-
     </main>
   );
 }
