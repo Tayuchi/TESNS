@@ -14,6 +14,8 @@ import { useState } from 'react';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { query, collection, where, getDocs } from 'firebase/firestore';
 import { auth, firestore } from '../firebase/firebase';
+import Link from 'next/link';
+
 export default function Login() {
     const [identifier, setIdentifier] = useState('');
     const [password, setPassword] = useState('');
@@ -75,9 +77,14 @@ export default function Login() {
                             sx={{ width: '96%' }}
                         />
                         <PassField value={password} onChange={(e) => setPassword(e.target.value)} />
-                        <Button fullWidth sx={{ mt: 2, width: '96%' }} onClick={handleLogin} color="primary" variant="contained">
+                        <Button fullWidth sx={{ mt: 2, mb: 2, width: '96%' }} onClick={handleLogin} color="primary" variant="contained">
                             ログインする
                         </Button>
+
+                        <Link href="/sign-up" style={{ color: '#1d9bf0'}}>
+                            サインアップする
+                        </Link>
+                        
                     </CardContent>
                 </Card>
             </Grid>
