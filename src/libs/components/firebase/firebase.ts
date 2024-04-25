@@ -1,6 +1,7 @@
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
+import { getStorage } from 'firebase/storage';
 // Firebaseの設定用のインターフェースを定義
 interface FirebaseConfig {
     apiKey: string;
@@ -28,3 +29,4 @@ const app = initializeApp(firebaseConfig);
 // Authオブジェクトを取得
 export const auth = getAuth(app);
 export const firestore = getFirestore(app);
+export const storage = getStorage(app);
