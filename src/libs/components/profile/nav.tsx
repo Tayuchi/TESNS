@@ -1,7 +1,5 @@
 import React from 'react';
-import { Box, Grid, Link, List, ListItem, Button, ListItemButton, ListItemIcon, Toolbar } from '@mui/material';
-import Home from '@mui/icons-material/Home';
-import ListItemText from '@mui/material/ListItemText';
+import { Box, ListItem, Button } from '@mui/material';
 
 const sidebarItems = [
   { text: 'Posts', href: '/' },
