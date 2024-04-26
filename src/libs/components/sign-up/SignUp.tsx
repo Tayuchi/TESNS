@@ -9,14 +9,12 @@ import { doc, setDoc } from 'firebase/firestore';
 import Link from "next/link";
 
 export default function SignUp() {
-    const [name, setName] = useState('');
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [emailError, setEmailError] = useState(false);
 
     const handleClick = async () => {
         const data = {
-            name: name,
             email: email,
             password: password
         };
@@ -27,11 +25,6 @@ export default function SignUp() {
         }
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-            const user = userCredential.user;
-            await setDoc(doc(firestore, "users", user.uid), {
-                nickname: name,
-                email: email,
-            });
             console.log("アカウント作成成功:", userCredential.user);
             // サインアップ後の処理をここに書く（例：ダッシュボードページにリダイレクト等）
         } catch (error) {
@@ -39,8 +32,6 @@ export default function SignUp() {
             console.error("アカウント作成エラー:", firebaseError.message); // firebaseError.message でエラーメッセージを参照
             // エラー処理をここに書く（例：エラーメッセージを表示）
         }
-
-
     };
 
     const validateEmail = () => { // 追加
@@ -57,15 +48,6 @@ export default function SignUp() {
                             アカウントを作成
                         </Typography>
                         <TextField
-                            id="name"
-                            label="名前"
-                            variant="outlined"
-                            sx={{ width: '96%' }}
-                            margin="normal"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                        />
-                        <TextField
                             fullWidth
                             id="email"
                             label="メールアドレス"
@@ -78,23 +60,27 @@ export default function SignUp() {
                             helperText={emailError ? '正しいメールアドレスを入力してください' : ''}
                         />
                         <PassField value={password} onChange={(e) => setPassword(e.target.value)} />
-
-                        <Button
-                            sx={{ mt: 2, mb: 2, width: '96%' }}
-                            onClick={handleClick}
-                            color="primary"
-                            variant="contained"
-                        >
-                            アカウントを作成する
-                        </Button>
-
-                        <Link href="/login" style={{ color: '#1d9bf0'}}>
+                        <Link href={{
+                            pathname: "/accountInformation", query: {
+                                email: email,
+                            }
+                        }}>
+                            <Button
+                                sx={{ mt: 2, mb: 2, width: '96%' }}
+                                onClick={handleClick}
+                                color="primary"
+                                variant="contained"
+                            >
+                                アカウントを作成する
+                            </Button>
+                        </Link>
+                        <Link href="/login" style={{ color: '#1d9bf0' }}>
                             ログインする
                         </Link>
 
                     </CardContent>
                 </Card>
             </Grid>
-        </div>
+        </div >
     );
 }

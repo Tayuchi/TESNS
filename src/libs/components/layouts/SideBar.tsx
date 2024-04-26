@@ -12,7 +12,7 @@ const SideBar = () => {
     <div>
       <Drawer
         variant='permanent'
-        sx={{ width: 240, flexShrink: 0 }}
+        sx={{ widACth: 160, flexShrink: 0 }}
       >
         <Toolbar />
         <Box sx={{ overflow: 'auto' }}>
