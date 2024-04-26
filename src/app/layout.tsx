@@ -18,7 +18,6 @@ export default function RootLayout({
   return (
     <html lang="jp">
       <body className={inter.className}>
-        <SideBar />
         {children}
       </body>
     </html>
