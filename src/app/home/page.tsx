@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { doc, getDoc, collection, query, onSnapshot, orderBy, DocumentData } from 'firebase/firestore';
 import { firestore } from '@/libs/components/firebase/firebase';
 import { Card, IconButton, Stack, Typography } from '@mui/material';
+import RedirectIfNoUser from '@/libs/components/acountInformation/Redirect';
 import Image from 'next/image';
 import twemoji from 'twemoji';
 //@ts-ignore
@@ -35,6 +36,7 @@ type PostData = {
     userData?: UserData;
 };
 export default function HomePage() {
+    RedirectIfNoUser();
     const [user, setUser] = useState<UserData | null>(null);
     const [posts, setPosts] = useState<PostData[]>([]); // 投稿を保持するための状態
     useEffect(() => {
