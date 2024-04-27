@@ -2,11 +2,11 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Drawer, Link, List, ListItem, ListItemButton, ListItemIcon, Toolbar, Modal, Card, CardMedia } from '@mui/material';
 import HomeIcon from '@mui/icons-material/Home'; // ホームアイコン
-import ExploreIcon from '@mui/icons-material/Explore'; // 探索アイコン
 import InfoIcon from '@mui/icons-material/Info'; // 情報アイコン
 import MessageIcon from '@mui/icons-material/Message'; // メッセージアイコン
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'; // プロフィールアイコン
 import AddBoxIcon from '@mui/icons-material/AddBox'; // 投稿するアイコン
+import LogoutIcon from '@mui/icons-material/Logout'; // ログアウトアイコン
 import { doc, setDoc, collection } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { storage, firestore, auth } from '../firebase/firebase';
@@ -52,14 +52,6 @@ const SideBar = () => {
             <ListItem>
               <ListItemButton>
                 <ListItemIcon>
-                  <ExploreIcon />
-                  <Link href='/home' color="inherit">Explore</Link>
-                </ListItemIcon>
-              </ListItemButton>
-            </ListItem>
-            <ListItem>
-              <ListItemButton>
-                <ListItemIcon>
                   <InfoIcon />
                   <Link href='/home' color="inherit">About</Link>
                 </ListItemIcon>
@@ -86,6 +78,14 @@ const SideBar = () => {
                 <ListItemIcon>
                   <AddBoxIcon />
                   Post
+                </ListItemIcon>
+              </ListItemButton>
+            </ListItem>
+            <ListItem>
+              <ListItemButton>
+                <ListItemIcon>
+                  <LogoutIcon />
+                  <Link href='/logout' color="inherit">Logout</Link>
                 </ListItemIcon>
               </ListItemButton>
             </ListItem>
