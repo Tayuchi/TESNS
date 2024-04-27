@@ -1,14 +1,12 @@
-// anthropicAPI.ts
+
 import Anthropic from '@anthropic-ai/sdk';
 
 const anthropic = new Anthropic({
-    apiKey: process.env.NEXT_PUBLIC_ANTHROPIC_API_KEY
+    apiKey: process.env["ANTHROPIC_API_KEY"]
 });
 
-// APIキーが正しく設定されているか確認するためのログ出力
-console.log("ANTHROPIC_API_KEY", process.env["ANTHROPIC_API_KEY"]);
-
-export async function sendMessageToAnthropic(messageText: string) {
+export async function POST(req: Request) {
+    const { messages } = await req.json()
     const msg = await anthropic.messages.create({
         model: "claude-3-haiku-20240307",
         max_tokens: 1000,
@@ -17,7 +15,7 @@ export async function sendMessageToAnthropic(messageText: string) {
             role: "user",
             content: [{
                 type: "text",
-                text: "「" + messageText + "」" + "のメッセージを人格者風に変換してください。"
+                text: messages
             }]
         }]
     }).catch(async (err) => {
@@ -30,4 +28,5 @@ export async function sendMessageToAnthropic(messageText: string) {
         }
     });
     console.log("帰ってきたメッセージ:" + msg);
+    return Response.json({ msg })
 }

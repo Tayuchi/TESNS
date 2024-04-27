@@ -5,7 +5,8 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { storage, firestore } from '../firebase/firebase';
 import { User } from 'firebase/auth';
-import { sendMessageToAnthropic } from '@/libs/api/anthropicAPI';
+
+
 interface PostModalProps {
     open: boolean;
     handleClose: () => void;
@@ -20,6 +21,7 @@ const PostModal: React.FC<PostModalProps> = ({
     const [imagePreview, setImagePreview] = useState('');
     const [postImage, setPostImage] = useState<File | null>(null);
     const [user, setUser] = useState<any>(null);
+    const [claude3Message, setClaude3Message] = useState('');
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
@@ -42,7 +44,16 @@ const PostModal: React.FC<PostModalProps> = ({
         if (!user || !user.email) return;
         try {
             let imageUrl = '';
-            await sendMessageToAnthropic(postContent);
+            const res = await fetch('/api/anthropic', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ postContent }),
+            })
+            const data = await res.json()
+            setClaude3Message(data.body)
+            console.log(claude3Message);
             if (postImage) {
                 const imageRef = ref(storage, `images/${postImage.name}`);
                 const snapshot = await uploadBytes(imageRef, postImage);
@@ -50,7 +61,7 @@ const PostModal: React.FC<PostModalProps> = ({
             }
             const newPostRef = doc(collection(firestore, 'posts'));
             await setDoc(newPostRef, {
-                content: postContent,
+                content: claude3Message,
                 imageUrl: imageUrl,
                 likes: 0,
                 retweets: 0,
