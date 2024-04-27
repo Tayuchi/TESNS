@@ -45,7 +45,7 @@ const SideBar = () => {
               <ListItemButton>
                 <ListItemIcon>
                   <HomeIcon />
-                  <Link href='/' color="inherit">Home</Link>
+                  <Link href='/home' color="inherit">Home</Link>
                 </ListItemIcon>
               </ListItemButton>
             </ListItem>
@@ -53,7 +53,7 @@ const SideBar = () => {
               <ListItemButton>
                 <ListItemIcon>
                   <ExploreIcon />
-                  <Link href='/' color="inherit">Explore</Link>
+                  <Link href='/home' color="inherit">Explore</Link>
                 </ListItemIcon>
               </ListItemButton>
             </ListItem>
@@ -61,7 +61,7 @@ const SideBar = () => {
               <ListItemButton>
                 <ListItemIcon>
                   <InfoIcon />
-                  <Link href='/' color="inherit">About</Link>
+                  <Link href='/home' color="inherit">About</Link>
                 </ListItemIcon>
               </ListItemButton>
             </ListItem>
@@ -69,7 +69,7 @@ const SideBar = () => {
               <ListItemButton>
                 <ListItemIcon>
                   <MessageIcon />
-                  <Link href='/' color="inherit">Message</Link>
+                  <Link href='/home' color="inherit">Message</Link>
                 </ListItemIcon>
               </ListItemButton>
             </ListItem>
@@ -77,7 +77,7 @@ const SideBar = () => {
               <ListItemButton>
                 <ListItemIcon>
                   <AccountCircleIcon />
-                  <Link href='home/profile' color="inherit">Profile</Link>
+                  <Link href='/home/profile' color="inherit">Profile</Link>
                 </ListItemIcon>
               </ListItemButton>
             </ListItem>
