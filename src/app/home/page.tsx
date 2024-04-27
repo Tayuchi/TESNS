@@ -2,6 +2,10 @@
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc, collection, query, onSnapshot, orderBy, DocumentData } from 'firebase/firestore';
 import { firestore } from '@/libs/components/firebase/firebase';
+import { Card } from '@mui/material';
+import Image from 'next/image';
+
+const DEFAULT_AVATAR = ""; // TODO: 初期アバターのURLをぶちこむ
 
 type UserData = {
     email: string;
@@ -36,6 +40,7 @@ export default function HomePage() {
                 if (userSnap.exists()) {
                     userData = userSnap.data() as UserData;
                 }
+                console.log(postData.imageUrl);
 
                 return {
                     id: docSnapshot.id, // docSnapshotを使用
@@ -59,6 +64,11 @@ export default function HomePage() {
     return (
         <>
             {posts.map((post) => (
+                <Card key={post.id}>
+                    <Image src={post.imageUrl || DEFAULT_AVATAR} alt="" width={256} height={256} />
+
+                </Card>
+            )/*(
                 <div key={post.id}>
                     <p>Content: {post.content}</p>
                     {post.imageUrl && (
@@ -74,7 +84,7 @@ export default function HomePage() {
                         </div>
                     )}
                 </div>
-            ))}
+            )*/)}
         </>
     );
 }
