@@ -55,27 +55,29 @@ const PostModal: React.FC<PostModalProps> = ({
                 }),
             })
             const data = await res.json()
-            
+
             console.log("postModal", data)
 
             // 応答から特定のテキスト内容だけを抽出して状態にセット
-            setClaude3Message(data.message);
+            if (data.message != "") {
+                const contentToSave = data.message;
 
-            if (postImage) {
-                const imageRef = ref(storage, `images/${postImage.name}`);
-                const snapshot = await uploadBytes(imageRef, postImage);
-                imageUrl = await getDownloadURL(snapshot.ref);
+                if (postImage) {
+                    const imageRef = ref(storage, `images/${postImage.name}`);
+                    const snapshot = await uploadBytes(imageRef, postImage);
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                }
+                const newPostRef = doc(collection(firestore, 'posts'));
+                await setDoc(newPostRef, {
+                    content: contentToSave,
+                    imageUrl: imageUrl,
+                    likes: 0,
+                    retweets: 0,
+                    replies: 0,
+                    email: user.email,
+                    timestamp: serverTimestamp()
+                });
             }
-            const newPostRef = doc(collection(firestore, 'posts'));
-            await setDoc(newPostRef, {
-                content: claude3Message,
-                imageUrl: imageUrl,
-                likes: 0,
-                retweets: 0,
-                replies: 0,
-                email: user.email,
-                timestamp: serverTimestamp()
-            });
 
             setPostContent('');
             setImagePreview('');
