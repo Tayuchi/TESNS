@@ -17,6 +17,14 @@ export async function sendMessageToAnthropic(messageText: string) {
                 text: "「" + messageText + "」" + "のメッセージを人格者風に変換してください。"
             }]
         }]
+    }).catch(async (err) => {
+        if (err instanceof Anthropic.APIError) {
+            console.log(err.status); // 400
+            console.log(err.name); // BadRequestError
+            console.log(err.headers); // {server: 'nginx', ...}
+        } else {
+            throw err;
+        }
     });
     console.log("帰ってきたメッセージ:" + msg);
 }
