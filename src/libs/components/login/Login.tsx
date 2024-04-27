@@ -32,7 +32,7 @@ export default function Login() {
 
     const handleLogin = async () => {
         if (!identifier || !password) {
-            setLoginError('メールアドレスとパスワードを入力してください。');
+            setLoginError('メールアドレス(ニックネーム)とパスワードを入力してください。');
             return;
         }
         let email = identifier;
@@ -49,9 +49,11 @@ export default function Login() {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             console.log("ログイン成功:", userCredential.user);
+            // ログイン成功時にユーザー情報をローカルストレージに保存
+            localStorage.setItem('user', JSON.stringify(userCredential.user));
             setLoginError('');
         } catch (error) {
-            setLoginError('ログインに失敗しました。メールアドレスまたはパスワードが間違っています。');
+            setLoginError('ログインに失敗しました。メールアドレス(ニックネーム)またはパスワードが間違っています。');
             console.error('ログインエラー:', error);
         }
     };
@@ -77,14 +79,17 @@ export default function Login() {
                             sx={{ width: '96%' }}
                         />
                         <PassField value={password} onChange={(e) => setPassword(e.target.value)} />
-                        <Button fullWidth sx={{ mt: 2, mb: 2, width: '96%' }} onClick={handleLogin} color="primary" variant="contained">
-                            ログインする
-                        </Button>
-
-                        <Link href="/sign-up" style={{ color: '#1d9bf0'}}>
+                        <Link href={{
+                            pathname: "/home"
+                        }}>
+                            <Button fullWidth sx={{ mt: 2, mb: 2, width: '96%' }} onClick={handleLogin} color="primary" variant="contained">
+                                ログインする
+                            </Button>
+                        </Link>
+                        <Link href="/sign-up" style={{ color: '#1d9bf0' }}>
                             サインアップする
                         </Link>
-                        
+
                     </CardContent>
                 </Card>
             </Grid>

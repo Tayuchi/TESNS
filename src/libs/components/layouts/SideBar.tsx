@@ -77,7 +77,7 @@ const SideBar = () => {
               <ListItemButton>
                 <ListItemIcon>
                   <AccountCircleIcon />
-                  <Link href='/' color="inherit">Profile</Link>
+                  <Link href='home/profile' color="inherit">Profile</Link>
                 </ListItemIcon>
               </ListItemButton>
             </ListItem>
@@ -95,7 +95,6 @@ const SideBar = () => {
       <PostModal
         open={open}
         handleClose={handleClose}
-        user={user}
       />
 
     </div>
