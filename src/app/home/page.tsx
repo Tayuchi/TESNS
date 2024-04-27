@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc, collection, query, onSnapshot, orderBy, DocumentData } from 'firebase/firestore';
 import { firestore } from '@/libs/components/firebase/firebase';
-import { Card, IconButton, Stack, Typography } from '@mui/material';
+import { Card, IconButton, Link, Stack, Typography } from '@mui/material';
 import RedirectIfNoUser from '@/libs/components/acountInformation/Redirect';
 import Image from 'next/image';
 import twemoji from 'twemoji';
@@ -76,44 +76,48 @@ export default function HomePage() {
     return (
         <>
             {posts.map((post) => (
-                <Card key={post.id}>
+                <Card key={post.id} sx={{
+                    padding: 1,
+                    width: { xs: "100%", sm: "500px" },
+                    margin: 2
+                }}>
                     <Stack direction="row">
-                        <div>
+                        <div className="m-1">
                             {/* アカウントのアイコン */}
-                            <Image src={post.userData?.profileImage || DEFAULT_AVATAR} alt="" width={50} height={50} />
+                            <Image src={post.userData?.profileImage || DEFAULT_AVATAR} alt="" width={40} height={40} className='rounded-full' />
                         </div>
                         <div>
                             <Stack direction="column">
                                 <div>
                                     {/* アカウント名 */}
-                                    <Typography>{post.userData?.nickname}</Typography>
+                                    <Link href="#" underline="hover" sx={{ color: "black", fontWeight: "bold" }}>{post.userData?.nickname}</Link>
                                 </div>
                                 <div>
                                     {/* ポストの文章 */}
-                                    <Typography>{post.content}</Typography>
+                                    <Typography variant="body1">{post.content}</Typography>
                                 </div>
                                 <div>
                                     {/* ポストの画像 */}
-                                    {post.imageUrl && <Image src={post.imageUrl} alt="" width={256} height={256} />}
+                                    {post.imageUrl && <Image src={post.imageUrl} alt="" width={256} height={256} className="border rounded-xl" />}
                                 </div>
                                 <div>
                                     {/* ポストへの反応 */}
                                     <Stack direction="row">
                                         <div>
                                             <IconButton>
-                                                <Image src={emoji_urls.heart} alt="いいね" width={20} height={20} />
+                                                <Image src={emoji_urls.heart} alt="いいね" width={20} height={20} draggable="false" />
                                             </IconButton>
                                             {post.likes}
                                         </div>
                                         <div>
                                             <IconButton>
-                                                <Image src={emoji_urls.recycle} alt="リポスト" width={20} height={20} />
+                                                <Image src={emoji_urls.recycle} alt="リポスト" width={20} height={20} draggable="false" />
                                             </IconButton>
                                             {post.retweets}
                                         </div>
                                         <div>
                                             <IconButton>
-                                                <Image src={emoji_urls.message} alt="リプライ" width={20} height={20} />
+                                                <Image src={emoji_urls.message} alt="リプライ" width={20} height={20} draggable="false" />
                                             </IconButton>
                                             {post.replies}
                                         </div>
