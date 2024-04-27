@@ -28,7 +28,7 @@ export default function HomePage() {
         const unsubscribe = onSnapshot(q, async (querySnapshot) => {
             const postsWithUsers = await Promise.all(querySnapshot.docs.map(async docSnapshot => { // docSnapshotに名前を変更
                 const postData = docSnapshot.data();
-                const userEmailFormatted = postData.userEmail.replace(/\./g, ',');
+                const userEmailFormatted = postData.email.replace(/\./g, ',');
                 const userRef = doc(firestore, 'users', userEmailFormatted);
                 const userSnap = await getDoc(userRef);
                 let userData: UserData | undefined = undefined;
