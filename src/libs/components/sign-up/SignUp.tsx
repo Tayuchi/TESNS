@@ -26,7 +26,9 @@ export default function SignUp() {
         try {
             const userCredential = await createUserWithEmailAndPassword(auth, email, password);
             console.log("アカウント作成成功:", userCredential.user);
-            // サインアップ後の処理をここに書く（例：ダッシュボードページにリダイレクト等）
+
+            // ローカルストレージにユーザーデータを保存
+            localStorage.setItem('user', JSON.stringify(userCredential.user));
         } catch (error) {
             const firebaseError = error as Error; // エラーをErrorとして扱う
             console.error("アカウント作成エラー:", firebaseError.message); // firebaseError.message でエラーメッセージを参照
@@ -61,9 +63,7 @@ export default function SignUp() {
                         />
                         <PassField value={password} onChange={(e) => setPassword(e.target.value)} />
                         <Link href={{
-                            pathname: "/accountInformation", query: {
-                                email: email,
-                            }
+                            pathname: "/accountInformation"
                         }}>
                             <Button
                                 sx={{ mt: 2, mb: 2, width: '96%' }}

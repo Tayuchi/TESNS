@@ -1,20 +1,24 @@
 'use client'
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { firestore, storage } from '../firebase/firebase';
 import { useSearchParams } from "next/navigation";
 import { TextField, Button, Card, CardContent, Typography, CardMedia } from '@mui/material';
 import Link from 'next/link';
+const getUserFromStorage = () => {
+    const userData = localStorage.getItem('user');
+    return userData ? JSON.parse(userData) : null;
+};
 export default function AccountInformation() {
-    const searchParams = useSearchParams();
+    const user = getUserFromStorage();
     const [userId, setUserId] = useState('');
     const [userImage, setUserImage] = useState();
     const [profileImage, setProfileImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [nickname, setNickname] = useState('');
-    const email = searchParams.get("email");
-    console.log(email);
+
+    console.log(user.email);
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files && event.target.files[0];
         if (file) {
@@ -29,15 +33,15 @@ export default function AccountInformation() {
 
     const handleSave = async () => {
         if (userId && profileImage && nickname) {
-            if (email != null) {
+            if (user.email != null) {
 
                 const imageRef = ref(storage, `userImages/${userId}`);
                 const uploadResult = await uploadBytes(imageRef, profileImage);
                 const imageUrl = await getDownloadURL(uploadResult.ref);
 
-                const emailFormatted = email.replace(/\./g, ','); // FirestoreのIDとして使用するためにメールアドレスのドットをカンマに置換
+                const emailFormatted = (user.email).replace(/\./g, ','); // FirestoreのIDとして使用するためにメールアドレスのドットをカンマに置換
                 await setDoc(doc(firestore, "users", emailFormatted), {
-                    email: email,
+                    email: user.email,
                     profileImage: imageUrl,
                     nickname: nickname,
                     userId: userId,
@@ -95,12 +99,7 @@ export default function AccountInformation() {
                     />
                 )}
                 <Link href={isLinkDisabled ? "accountInformation" : {
-                    pathname: "", query: {
-                        email: email,
-                        profileImage: previewUrl,
-                        nickname: nickname,
-                        userId: userId,
-                    }
+                    pathname: "",
                 }}>
                     <div style={{ pointerEvents: isLinkDisabled ? 'none' : 'auto' }}>
                         <Button
