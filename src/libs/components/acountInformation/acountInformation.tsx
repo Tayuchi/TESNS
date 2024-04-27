@@ -45,6 +45,9 @@ export default function AccountInformation() {
                     profileImage: imageUrl,
                     nickname: nickname,
                     userId: userId,
+                    follow: 0,
+                    follower: 0,
+                    postsOfNumber: 0,
                 });
             }
         }

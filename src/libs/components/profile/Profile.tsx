@@ -7,9 +7,9 @@ import { useEffect, useState } from 'react';
 import { doc, getDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 interface UserProfile {
-    displayName: string;
+    nickname: string;
     email: string;
-    userID: string;
+    userId: string;
     followers: number;
     following: number;
     profileImage?: string;  // プロファイル画像のURLを含む新しいプロパティ
@@ -48,8 +48,8 @@ export default function Profile() {
                     const userData = docSnap.data() as UserProfile;
                     setUser(userData);
                     // 取得したデータでUIの状態を更新
-                    setUName(userData.displayName);
-                    setUID(userData.userID);
+                    setUName(userData.nickname);
+                    setUID(userData.userId);
                     setHdPicSrc('/1500x500.jpg'); // 仮に固定の画像パスを設定
                     setIcnSrc(userData.profileImage || '/3zU3wFwk_400x400.jpg');
                     //setIntroduction(userData.introduction || '紹介文が設定されていません。');
