@@ -89,7 +89,7 @@ export default function Profile() {
                         src={hdPicSrc}
                         width={1080}
                         height={360}
-                        layout="fixed"
+                        layout="responsive"
                         objectFit="cover"
                         alt=""
                     />
