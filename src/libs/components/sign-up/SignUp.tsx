@@ -7,6 +7,7 @@ import { auth, firestore } from '../firebase/firebase'; // パスは貴様の環
 import { createUserWithEmailAndPassword } from 'firebase/auth';
 import { doc, setDoc } from 'firebase/firestore';
 import Link from "next/link";
+import Image from "next/image";
 
 export default function SignUp() {
     const [email, setEmail] = useState('');
@@ -46,6 +47,16 @@ export default function SignUp() {
             <Grid container justifyContent="center" alignItems="center" style={{ height: '100vh' }}>
                 <Card sx={{ maxWidth: 300 }}>
                     <CardContent sx={{ textAlign: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}> {/* Center the image */}
+                            <Image
+                                src="/icon.jpg"
+                                width={50}
+                                height={50}
+                                layout="fixed"
+                                alt=""
+                            />
+                        </div>
+
                         <Typography variant="h6" fontWeight="fontWeightBold">
                             アカウントを作成
                         </Typography>

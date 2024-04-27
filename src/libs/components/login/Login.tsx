@@ -15,6 +15,7 @@ import { signInWithEmailAndPassword } from 'firebase/auth';
 import { query, collection, where, getDocs } from 'firebase/firestore';
 import { auth, firestore } from '../firebase/firebase';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Login() {
     const [identifier, setIdentifier] = useState('');
@@ -61,8 +62,17 @@ export default function Login() {
     return (
         <div className="flex flex-col justify-center items-center h-screen">
             <Grid container justifyContent="center" alignItems="center" style={{ height: '100vh' }}>
-                <Card sx={{ maxWidth: 300 }}>
+                <Card sx={{ maxWidth:400 }}>
                     <CardContent sx={{ textAlign: 'center' }}>
+                        <div style={{ display: 'flex', justifyContent: 'center' }}> {/* Center the image */}
+                            <Image
+                                src="/icon.jpg"
+                                width={50}
+                                height={50}
+                                layout="fixed"
+                                alt=""
+                            />
+                        </div>
                         <Typography variant="h6" fontWeight="fontWeightBold">
                             ログイン
                         </Typography>
