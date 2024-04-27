@@ -27,7 +27,6 @@ export default function Profile() {
                         height={360}
                         layout="fixed"
                         objectFit="cover"
-                        className="hidden md:block"
                         alt=""
                     />
                 </Grid>
