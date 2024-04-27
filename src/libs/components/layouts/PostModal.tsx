@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Box, Button, TextField, Typography, Card, CardMedia, Modal } from '@mui/material';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { doc, setDoc, collection } from 'firebase/firestore';
+import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { storage, firestore } from '../firebase/firebase';
 import { User } from 'firebase/auth';
 
@@ -32,42 +32,43 @@ const PostModal: React.FC<PostModalProps> = ({
             reader.readAsDataURL(file);
         }
     };
-    /*
-        const handleSubmit = async () => {
-            if (!user || !user.email) return;
-            try {
-                let imageUrl = '';
-                if (postImage) {
-                    const imageRef = ref(storage, `images/${postImage.name}`);
-                    const snapshot = await uploadBytes(imageRef, postImage);
-                    imageUrl = await getDownloadURL(snapshot.ref);
-                }
-                const newPostRef = doc(collection(firestore, 'posts'));
-                await setDoc(newPostRef, {
-                    content: postContent,
-                    imageUrl: imageUrl,
-                    likes: 0,
-                    retweets: 0,
-                    replies: 0,
-                    email: user.email
-                });
-                setPostContent('');
-                setImagePreview('');
-                setPostImage(null);
-                handleClose();
-            } catch (error) {
-                console.error("Error adding document: ", error);
-            }
-        };
-        */
-    const handleSubmit = () => {
-        setPostContent('');
-        setImagePreview('');
-        setPostImage(null);
-        console.log(postContent);
-        handleClose();
-    };
 
+    const handleSubmit = async () => {
+        if (!user || !user.email) return;
+        try {
+            let imageUrl = '';
+            if (postImage) {
+                const imageRef = ref(storage, `images/${postImage.name}`);
+                const snapshot = await uploadBytes(imageRef, postImage);
+                imageUrl = await getDownloadURL(snapshot.ref);
+            }
+            const newPostRef = doc(collection(firestore, 'posts'));
+            await setDoc(newPostRef, {
+                content: postContent,
+                imageUrl: imageUrl,
+                likes: 0,
+                retweets: 0,
+                replies: 0,
+                email: user.email,
+                timestamp: serverTimestamp()
+            });
+            setPostContent('');
+            setImagePreview('');
+            setPostImage(null);
+            handleClose();
+        } catch (error) {
+            console.error("Error adding document: ", error);
+        }
+    };
+    /*
+const handleSubmit = () => {
+    setPostContent('');
+    setImagePreview('');
+    setPostImage(null);
+    console.log(postContent);
+    handleClose();
+};
+*/
     const style = {
         position: 'absolute',
         top: '50%',
