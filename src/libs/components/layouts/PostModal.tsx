@@ -5,7 +5,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { storage, firestore } from '../firebase/firebase';
 import { User } from 'firebase/auth';
-
+import { sendMessageToAnthropic } from '@/libs/api/anthropicAPI';
 interface PostModalProps {
     open: boolean;
     handleClose: () => void;
@@ -42,6 +42,7 @@ const PostModal: React.FC<PostModalProps> = ({
         if (!user || !user.email) return;
         try {
             let imageUrl = '';
+            await sendMessageToAnthropic(postContent);
             if (postImage) {
                 const imageRef = ref(storage, `images/${postImage.name}`);
                 const snapshot = await uploadBytes(imageRef, postImage);
@@ -57,6 +58,7 @@ const PostModal: React.FC<PostModalProps> = ({
                 email: user.email,
                 timestamp: serverTimestamp()
             });
+
             setPostContent('');
             setImagePreview('');
             setPostImage(null);
