@@ -52,14 +52,6 @@ const SideBar = () => {
             <ListItem>
               <ListItemButton>
                 <ListItemIcon>
-                  <InfoIcon />
-                  <Link href='/home' color="inherit">About</Link>
-                </ListItemIcon>
-              </ListItemButton>
-            </ListItem>
-            <ListItem>
-              <ListItemButton>
-                <ListItemIcon>
                   <MessageIcon />
                   <Link href='/home' color="inherit">Message</Link>
                 </ListItemIcon>
