@@ -3,17 +3,81 @@
 import { Button, Grid, Typography } from "@mui/material";
 import Image from "next/image";
 import Nav from "./nav";
-import { useId, useState } from "react";
-
+import { useEffect, useState } from 'react';
+import { doc, getDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { firestore } from '../firebase/firebase';
+interface UserProfile {
+    displayName: string;
+    email: string;
+    userID: string;
+    followers: number;
+    following: number;
+    profileImage?: string;  // プロファイル画像のURLを含む新しいプロパティ
+}
+type PostData = {
+    id: string;
+    content: string;
+    imageUrl?: string;
+    likes: number;
+    retweets: number;
+    replies: number;
+    userEmail: string;
+};
 export default function Profile() {
+    const [user, setUser] = useState<UserProfile | null>(null);
+    const [posts, setPosts] = useState<PostData[]>([]);
     var createdAt = 'なう';
-    const [uName, setUName] = useState('すんぎょ');
-    const [uID, setUID] = useState('@user_id');
-    const [hdPicSrc, setHdPicSrc] = useState('/1500x500.jpg');
-    const [icnSrc, setIcnSrc] = useState('/3zU3wFwk_400x400.jpg');
-    const [introduction, setIntroduction] = useState('わたしはすんぎょすんぎょすんぎょすんぎょすんぎょすんぎょすんぎょすんぎょ');
-    const [followings, setFollowings] = useState(100);
-    const [followers, setFollowers] = useState(100);
+    const [uName, setUName] = useState('');
+    const [uID, setUID] = useState('');
+    const [hdPicSrc, setHdPicSrc] = useState('');
+    const [icnSrc, setIcnSrc] = useState('');
+    const [introduction, setIntroduction] = useState('');
+    const [followings, setFollowings] = useState(0);
+    const [followers, setFollowers] = useState(0);
+    useEffect(() => {
+        // ローカルストレージからユーザーデータを取得
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            const emailFormatted = parsedUser.email.replace(/\./g, ',');
+
+            // ユーザーデータの取得
+            const userRef = doc(firestore, 'users', emailFormatted);
+            getDoc(userRef).then((docSnap) => {
+                if (docSnap.exists()) {
+                    const userData = docSnap.data() as UserProfile;
+                    setUser(userData);
+                    // 取得したデータでUIの状態を更新
+                    setUName(userData.displayName);
+                    setUID(userData.userID);
+                    setHdPicSrc('/1500x500.jpg'); // 仮に固定の画像パスを設定
+                    setIcnSrc(userData.profileImage || '/3zU3wFwk_400x400.jpg');
+                    //setIntroduction(userData.introduction || '紹介文が設定されていません。');
+                    setFollowings(userData.following);
+                    setFollowers(userData.followers);
+                }
+            }).catch(console.error);
+
+            // ユーザーの投稿を取得
+            const q = query(collection(firestore, 'posts'), orderBy('timestamp', 'desc'));
+            const unsubscribe = onSnapshot(q, (querySnapshot) => {
+                const postsData = querySnapshot.docs.map(doc => ({
+                    id: doc.id,
+                    content: doc.data().content,
+                    imageUrl: doc.data().imageUrl,
+                    likes: doc.data().likes,
+                    retweets: doc.data().retweets,
+                    replies: doc.data().replies,
+                    userEmail: doc.data().userEmail,
+                }) as PostData);
+                setPosts(postsData);
+            });
+
+            return () => unsubscribe(); // コンポーネントのアンマウント時にリスナーを解除
+        }
+    }, []);
+
+
 
     // データ取ってくる処理
 
