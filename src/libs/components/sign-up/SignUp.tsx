@@ -63,9 +63,7 @@ export default function SignUp() {
                         />
                         <PassField value={password} onChange={(e) => setPassword(e.target.value)} />
                         <Link href={{
-                            pathname: "/accountInformation", query: {
-                                email: email,
-                            }
+                            pathname: "/accountInformation"
                         }}>
                             <Button
                                 sx={{ mt: 2, mb: 2, width: '96%' }}
