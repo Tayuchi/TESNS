@@ -6,6 +6,7 @@ import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { storage, firestore } from '../firebase/firebase';
 import { User } from 'firebase/auth';
 
+
 interface PostModalProps {
     open: boolean;
     handleClose: () => void;
@@ -20,6 +21,7 @@ const PostModal: React.FC<PostModalProps> = ({
     const [imagePreview, setImagePreview] = useState('');
     const [postImage, setPostImage] = useState<File | null>(null);
     const [user, setUser] = useState<any>(null);
+    const [claude3Message, setClaude3Message] = useState('');
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
@@ -42,21 +44,41 @@ const PostModal: React.FC<PostModalProps> = ({
         if (!user || !user.email) return;
         try {
             let imageUrl = '';
-            if (postImage) {
-                const imageRef = ref(storage, `images/${postImage.name}`);
-                const snapshot = await uploadBytes(imageRef, postImage);
-                imageUrl = await getDownloadURL(snapshot.ref);
+
+            const res = await fetch('/api/anthropic', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    messages: postContent
+                }),
+            })
+            const data = await res.json()
+
+            console.log("postModal", data)
+
+            // 応答から特定のテキスト内容だけを抽出して状態にセット
+            if (data.message != "") {
+                const contentToSave = data.message;
+
+                if (postImage) {
+                    const imageRef = ref(storage, `images/${postImage.name}`);
+                    const snapshot = await uploadBytes(imageRef, postImage);
+                    imageUrl = await getDownloadURL(snapshot.ref);
+                }
+                const newPostRef = doc(collection(firestore, 'posts'));
+                await setDoc(newPostRef, {
+                    content: contentToSave,
+                    imageUrl: imageUrl,
+                    likes: 0,
+                    retweets: 0,
+                    replies: 0,
+                    email: user.email,
+                    timestamp: serverTimestamp()
+                });
             }
-            const newPostRef = doc(collection(firestore, 'posts'));
-            await setDoc(newPostRef, {
-                content: postContent,
-                imageUrl: imageUrl,
-                likes: 0,
-                retweets: 0,
-                replies: 0,
-                email: user.email,
-                timestamp: serverTimestamp()
-            });
+
             setPostContent('');
             setImagePreview('');
             setPostImage(null);

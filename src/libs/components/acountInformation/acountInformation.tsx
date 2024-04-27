@@ -11,14 +11,21 @@ const getUserFromStorage = () => {
     return userData ? JSON.parse(userData) : null;
 };
 export default function AccountInformation() {
-    const user = getUserFromStorage();
+
     const [userId, setUserId] = useState('');
     const [userImage, setUserImage] = useState();
     const [profileImage, setProfileImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [nickname, setNickname] = useState('');
-
-    console.log(user.email);
+    const storedUser = localStorage.getItem('user');
+    const [email, setEmail] = useState('');
+    useEffect(() => {
+        const storedUser = localStorage.getItem('user');
+        if (storedUser) {
+            const parsedUser = JSON.parse(storedUser);
+            setEmail(parsedUser.email);
+        }
+    }, []);
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files && event.target.files[0];
         if (file) {
@@ -33,15 +40,15 @@ export default function AccountInformation() {
 
     const handleSave = async () => {
         if (userId && profileImage && nickname) {
-            if (user.email != null) {
+            if (email != null) {
 
                 const imageRef = ref(storage, `userImages/${userId}`);
                 const uploadResult = await uploadBytes(imageRef, profileImage);
                 const imageUrl = await getDownloadURL(uploadResult.ref);
 
-                const emailFormatted = (user.email).replace(/\./g, ','); // FirestoreのIDとして使用するためにメールアドレスのドットをカンマに置換
+                const emailFormatted = (email).replace(/\./g, ','); // FirestoreのIDとして使用するためにメールアドレスのドットをカンマに置換
                 await setDoc(doc(firestore, "users", emailFormatted), {
-                    email: user.email,
+                    email: email,
                     profileImage: imageUrl,
                     nickname: nickname,
                     userId: userId,
@@ -101,7 +108,7 @@ export default function AccountInformation() {
                         alt="プレビュー画像"
                     />
                 )}
-                <Link href={isLinkDisabled ? "accountInformation" : {
+                <Link href={isLinkDisabled ? "/home" : {
                     pathname: "",
                 }}>
                     <div style={{ pointerEvents: isLinkDisabled ? 'none' : 'auto' }}>
