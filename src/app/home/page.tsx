@@ -2,10 +2,20 @@
 import React, { useEffect, useState } from 'react';
 import { doc, getDoc, collection, query, onSnapshot, orderBy, DocumentData } from 'firebase/firestore';
 import { firestore } from '@/libs/components/firebase/firebase';
-import { Card } from '@mui/material';
+import { Card, IconButton, Stack, Typography } from '@mui/material';
 import Image from 'next/image';
+import twemoji from 'twemoji';
+//@ts-ignore
+import DOMParserReact from 'dom-parser-react'
+import ReactSVG from 'react-svg';
 
 const DEFAULT_AVATAR = ""; // TODO: 初期アバターのURLをぶちこむ
+
+const emoji_urls = {
+    heart: `https://twemoji.maxcdn.com/v/latest/svg/${twemoji.convert.toCodePoint("❤").split('-')[0]}.svg`,
+    recycle: `https://twemoji.maxcdn.com/v/latest/svg/${twemoji.convert.toCodePoint("♻️").split('-')[0]}.svg`,
+    message: `https://twemoji.maxcdn.com/v/latest/svg/${twemoji.convert.toCodePoint("💬").split('-')[0]}.svg`,
+};
 
 type UserData = {
     email: string;
@@ -65,26 +75,54 @@ export default function HomePage() {
         <>
             {posts.map((post) => (
                 <Card key={post.id}>
-                    <Image src={post.imageUrl || DEFAULT_AVATAR} alt="" width={256} height={256} />
+                    <Stack direction="row">
+                        <div>
+                            {/* アカウントのアイコン */}
+                            <Image src={post.userData?.profileImage || DEFAULT_AVATAR} alt="" width={50} height={50} />
+                        </div>
+                        <div>
+                            <Stack direction="column">
+                                <div>
+                                    {/* アカウント名 */}
+                                    <Typography>{post.userData?.nickname}</Typography>
+                                </div>
+                                <div>
+                                    {/* ポストの文章 */}
+                                    <Typography>{post.content}</Typography>
+                                </div>
+                                <div>
+                                    {/* ポストの画像 */}
+                                    {post.imageUrl && <Image src={post.imageUrl} alt="" width={256} height={256} />}
+                                </div>
+                                <div>
+                                    {/* ポストへの反応 */}
+                                    <Stack direction="row">
+                                        <div>
+                                            <IconButton>
+                                                <Image src={emoji_urls.heart} alt="いいね" width={20} height={20} />
+                                            </IconButton>
+                                            {post.likes}
+                                        </div>
+                                        <div>
+                                            <IconButton>
+                                                <Image src={emoji_urls.recycle} alt="リポスト" width={20} height={20} />
+                                            </IconButton>
+                                            {post.retweets}
+                                        </div>
+                                        <div>
+                                            <IconButton>
+                                                <Image src={emoji_urls.message} alt="リプライ" width={20} height={20} />
+                                            </IconButton>
+                                            {post.replies}
+                                        </div>
+                                    </Stack>
+                                </div>
+                            </Stack>
+                        </div>
+                    </Stack>
 
                 </Card>
-            )/*(
-                <div key={post.id}>
-                    <p>Content: {post.content}</p>
-                    {post.imageUrl && (
-                        <img src={post.imageUrl} alt="Post" style={{ width: "256px" }} />
-                    )}
-                    <p>Likes: {post.likes}</p>
-                    <p>Retweets: {post.retweets}</p>
-                    <p>Replies: {post.replies}</p>
-                    {post.userData && (
-                        <div>
-                            <p>Posted by: {post.userData.nickname}</p>
-                            <img src={post.userData.profileImage} alt="User" style={{ width: "50px" }} />
-                        </div>
-                    )}
-                </div>
-            )*/)}
+            ))}
         </>
     );
 }
