@@ -55,6 +55,8 @@ const PostModal: React.FC<PostModalProps> = ({
                 }),
             })
             const data = await res.json()
+            
+            console.log("postModal", data)
 
             // 応答から特定のテキスト内容だけを抽出して状態にセット
             setClaude3Message(data.message);
