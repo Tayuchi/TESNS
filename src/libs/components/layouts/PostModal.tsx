@@ -57,11 +57,7 @@ const PostModal: React.FC<PostModalProps> = ({
             const data = await res.json()
 
             // 応答から特定のテキスト内容だけを抽出して状態にセット
-            if (data && data.message) {
-                setClaude3Message(data.message);
-            } else {
-                console.error('No message returned from the API');
-            }
+            setClaude3Message(data.message);
 
             if (postImage) {
                 const imageRef = ref(storage, `images/${postImage.name}`);
