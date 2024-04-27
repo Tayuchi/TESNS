@@ -44,16 +44,25 @@ const PostModal: React.FC<PostModalProps> = ({
         if (!user || !user.email) return;
         try {
             let imageUrl = '';
+
             const res = await fetch('/api/anthropic', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ postContent }),
+                body: JSON.stringify({
+                    messages: postContent
+                }),
             })
             const data = await res.json()
-            setClaude3Message(data.body)
-            console.log(claude3Message);
+
+            // 応答から特定のテキスト内容だけを抽出して状態にセット
+            if (data && data.message) {
+                setClaude3Message(data.message);
+            } else {
+                console.error('No message returned from the API');
+            }
+
             if (postImage) {
                 const imageRef = ref(storage, `images/${postImage.name}`);
                 const snapshot = await uploadBytes(imageRef, postImage);
