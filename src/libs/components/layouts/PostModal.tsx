@@ -5,8 +5,6 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { storage, firestore } from '../firebase/firebase';
 import { User } from 'firebase/auth';
-
-
 interface PostModalProps {
     open: boolean;
     handleClose: () => void;
@@ -48,7 +46,53 @@ const PostModal: React.FC<PostModalProps> = ({
             }
         }
     };
-    async function sendImageToAPI(imageData: string, imageType: string): Promise<void> {
+    async function uploadImageToServer(imageUrl: string) {
+        try {
+            const response = await fetch('/api/firebase', {  // `/api/uploadImage`はサーバー側のAPIエンドポイントのパス
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ imageUrl })
+            });
+
+            const data = await response.json();  // サーバーからのレスポンスをJSON形式で受け取る
+
+            if (response.ok) {
+                console.log('Image uploaded successfully:', data.savedUrl);
+                return data.savedUrl;  // アップロードした画像の永続的なURLを返す
+            } else {
+                throw new Error(data.error || 'Failed to upload image');
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+        }
+    }
+    async function imageGenerate(prompt: string): Promise<string> {
+        console.log("prompt", prompt);
+        try {
+            const response = await fetch('/api/dalle3', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    str: prompt
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json(); // サーバーからのレスポンスをJSONとしてパース
+            return data.dalle3Url;
+        } catch (error) {
+            console.error("エラーが発生しました:", error);
+            throw new Error("API response processing failed.");
+        }
+    }
+    async function sendImageToAPI(imageData: string, imageType: string): Promise<string> {
         console.log("base64data", imageData)
         console.log("postImage.type", imageType)
         try {
@@ -58,8 +102,8 @@ const PostModal: React.FC<PostModalProps> = ({
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    image1_media_type: imageType, // 画像のメディアタイプ（例: 'image/jpeg'）
-                    image1_data: imageData // Base64エンコードされた画像データ
+                    image1_media_type: imageType,
+                    image1_data: imageData
                 })
             });
 
@@ -67,36 +111,18 @@ const PostModal: React.FC<PostModalProps> = ({
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
-            const data = await response.json(); // サーバーからのレスポンスをJSONとしてパース
-            return data.message;
+            const data = await response.json();  // サーバーからのレスポンスをJSONとしてパース
+            return data.message;  // 応答からメッセージを返す
         } catch (error) {
             console.error("エラーが発生しました:", error);
+            throw new Error("API response processing failed.");
         }
     }
 
     const handleSubmit = async () => {
         if (!user || !user.email) return;
+
         try {
-            let imageUrl = '';
-            /* コメントを外したら画像に対する文章を生成してくれるようになる 
-            if (postImage) {
-                const reader = new FileReader();
-                reader.onloadend = async () => {
-                    const result = reader.result as string;
-                    // プレフィックスを削除
-                    const base64data = result.replace(/^data:image\/\w+;base64,/, '');
-                    try {
-                        console.log("base64data", base64data)
-                        console.log("postImage.type", postImage.type)
-                        const imageInformation = await sendImageToAPI(base64data, postImage.type);
-                        console.log(imageInformation);
-                    } catch (error) {
-                        console.error("sendImageToAPIでエラーが発生しました:", error);
-                    }
-                };
-                reader.readAsDataURL(postImage);
-            }
-*/
             const res = await fetch('/api/anthropic', {
                 method: 'POST',
                 headers: {
@@ -105,30 +131,58 @@ const PostModal: React.FC<PostModalProps> = ({
                 body: JSON.stringify({
                     messages: postContent
                 }),
-            })
-            const data = await res.json()
+            });
+            const data = await res.json();
 
-            console.log("postModal", data)
-
-            // 応答から特定のテキスト内容だけを抽出して状態にセット
             if (data.message != "") {
                 const contentToSave = data.message;
 
                 if (postImage) {
-                    const imageRef = ref(storage, `images/${postImage.name}`);
-                    const snapshot = await uploadBytes(imageRef, postImage);
-                    imageUrl = await getDownloadURL(snapshot.ref);
+                    const reader = new FileReader();
+                    reader.onloadend = async () => {
+                        const result = reader.result as string;
+                        const base64data = result.replace(/^data:image\/\w+;base64,/, '');
+                        try {
+                            const imageInformation = await sendImageToAPI(base64data, postImage.type);
+                            const generatedImage = await imageGenerate(imageInformation);
+
+                            if (generatedImage) {
+                                const imageUrl = await uploadImageToServer(generatedImage);
+
+                                // Update Firestore after the image URL is available
+                                const newPostRef = doc(collection(firestore, 'posts'));
+                                await setDoc(newPostRef, {
+                                    content: contentToSave,
+                                    imageUrl: imageUrl,
+                                    likes: 0,
+                                    retweets: 0,
+                                    replies: 0,
+                                    email: user.email,
+                                    timestamp: serverTimestamp()
+                                });
+                            } else {
+                                console.error("Generated image URL is invalid.");
+                                alert('生成された画像のURLが無効です。');
+                            }
+                        } catch (error) {
+                            console.error("Error during image processing:", error);
+                            alert('画像を保存できませんでした。URLが正しいか確認してください。');
+                        }
+                    };
+                    reader.readAsDataURL(postImage);
+                } else {
+                    // No image case, just save the text
+                    const newPostRef = doc(collection(firestore, 'posts'));
+                    await setDoc(newPostRef, {
+                        content: postContent,
+                        imageUrl: '',  // No image URL
+                        likes: 0,
+                        retweets: 0,
+                        replies: 0,
+                        email: user.email,
+                        timestamp: serverTimestamp()
+                    });
                 }
-                const newPostRef = doc(collection(firestore, 'posts'));
-                await setDoc(newPostRef, {
-                    content: contentToSave,
-                    imageUrl: imageUrl,
-                    likes: 0,
-                    retweets: 0,
-                    replies: 0,
-                    email: user.email,
-                    timestamp: serverTimestamp()
-                });
             }
 
             setPostContent('');
