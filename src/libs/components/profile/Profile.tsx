@@ -1,11 +1,12 @@
 'use client'
 
-import { Button, Grid, Typography } from "@mui/material";
+import { Button, Card, Grid, IconButton, Link, Stack, Typography } from "@mui/material";
 import Image from "next/image";
 import Nav from "./nav";
 import { useEffect, useState } from 'react';
 import { doc, getDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
+import twemoji from "twemoji";
 interface UserProfile {
     nickname: string;
     email: string;
@@ -14,6 +15,13 @@ interface UserProfile {
     following: number;
     profileImage?: string;  // プロファイル画像のURLを含む新しいプロパティ
 }
+type UserData = {
+    email: string;
+    nickname: string;
+    profileImage: string;
+    userId: string;
+};
+
 type PostData = {
     id: string;
     content: string;
@@ -22,7 +30,15 @@ type PostData = {
     retweets: number;
     replies: number;
     userEmail: string;
+    userData?: UserData;
 };
+
+const emoji_urls = {
+    heart: `https://twemoji.maxcdn.com/v/latest/svg/${twemoji.convert.toCodePoint("❤").split('-')[0]}.svg`,
+    recycle: `https://twemoji.maxcdn.com/v/latest/svg/${twemoji.convert.toCodePoint("♻️").split('-')[0]}.svg`,
+    message: `https://twemoji.maxcdn.com/v/latest/svg/${twemoji.convert.toCodePoint("💬").split('-')[0]}.svg`,
+};
+
 export default function Profile() {
     const [user, setUser] = useState<UserProfile | null>(null);
     const [posts, setPosts] = useState<PostData[]>([]);
@@ -128,6 +144,60 @@ export default function Profile() {
                 </Grid>
             </Grid>
             <Nav />
+            {posts.map((post) => (
+                <Card key={post.id} sx={{
+                    padding: 1,
+                    width: { xs: "100%", sm: "500px" },
+                    margin: 2
+                }}>
+                    <Stack direction="row">
+                        <div className="m-1">
+                            {/* アカウントのアイコン */}
+                            <Image src={post.userData?.profileImage || ""} alt="" width={40} height={40} className='rounded-full' />
+                        </div>
+                        <div>
+                            <Stack direction="column">
+                                <div>
+                                    {/* アカウント名 */}
+                                    <Link href="#" underline="hover" sx={{ color: "black", fontWeight: "bold" }}>{post.userData?.nickname}</Link>
+                                </div>
+                                <div>
+                                    {/* ポストの文章 */}
+                                    <Typography variant="body1">{post.content}</Typography>
+                                </div>
+                                <div>
+                                    {/* ポストの画像 */}
+                                    {post.imageUrl && <Image src={post.imageUrl} alt="" width={256} height={256} className="border rounded-xl" />}
+                                </div>
+                                <div>
+                                    {/* ポストへの反応 */}
+                                    <Stack direction="row">
+                                        <div>
+                                            <IconButton>
+                                                <Image src={emoji_urls.heart} alt="いいね" width={20} height={20} draggable="false" />
+                                            </IconButton>
+                                            {post.likes}
+                                        </div>
+                                        <div>
+                                            <IconButton>
+                                                <Image src={emoji_urls.recycle} alt="リポスト" width={20} height={20} draggable="false" />
+                                            </IconButton>
+                                            {post.retweets}
+                                        </div>
+                                        <div>
+                                            <IconButton>
+                                                <Image src={emoji_urls.message} alt="リプライ" width={20} height={20} draggable="false" />
+                                            </IconButton>
+                                            {post.replies}
+                                        </div>
+                                    </Stack>
+                                </div>
+                            </Stack>
+                        </div>
+                    </Stack>
+
+                </Card>
+            ))}
         </>
     )
 }
