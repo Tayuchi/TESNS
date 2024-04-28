@@ -52,7 +52,6 @@ export default function HomePage() {
                 if (userSnap.exists()) {
                     userData = userSnap.data() as UserData;
                 }
-                console.log(postData.imageUrl);
 
                 return {
                     id: docSnapshot.id, // docSnapshotを使用
