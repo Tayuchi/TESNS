@@ -18,10 +18,11 @@ const PostModal: React.FC<PostModalProps> = ({
     handleClose,
 }) => {
     const [postContent, setPostContent] = useState('');
-    const [imagePreview, setImagePreview] = useState('');
+    const [imagePreview, setImagePreview] = useState<string>('');
     const [postImage, setPostImage] = useState<File | null>(null);
     const [user, setUser] = useState<any>(null);
-    const [claude3Message, setClaude3Message] = useState('');
+
+
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
         if (storedUser) {
@@ -31,20 +32,71 @@ const PostModal: React.FC<PostModalProps> = ({
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files && event.target.files[0];
         if (file) {
-            setPostImage(file);
-            const reader = new FileReader();
-            reader.onloadend = () => {
-                setImagePreview(reader.result as string);
-            };
-            reader.readAsDataURL(file);
+            // 画像ファイルの拡張子を確認
+            const fileType = file.type;
+            if (fileType === "image/jpeg" || fileType === "image/png") {
+                setPostImage(file);
+                const reader = new FileReader();
+                reader.onloadend = () => {
+                    const base64data = reader.result as string;
+                    setImagePreview(base64data);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                // 対応していないファイルタイプの場合、警告を表示
+                alert('JPEG、PNG以外の画像はアップロードできません！！');
+            }
         }
     };
+    async function sendImageToAPI(imageData: string, imageType: string): Promise<void> {
+        console.log("base64data", imageData)
+        console.log("postImage.type", imageType)
+        try {
+            const response = await fetch('/api/anthropicPicture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    image1_media_type: imageType, // 画像のメディアタイプ（例: 'image/jpeg'）
+                    image1_data: imageData // Base64エンコードされた画像データ
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json(); // サーバーからのレスポンスをJSONとしてパース
+            return data.message;
+        } catch (error) {
+            console.error("エラーが発生しました:", error);
+        }
+    }
 
     const handleSubmit = async () => {
         if (!user || !user.email) return;
         try {
             let imageUrl = '';
-
+            /* コメントを外したら画像に対する文章を生成してくれるようになる 
+            if (postImage) {
+                const reader = new FileReader();
+                reader.onloadend = async () => {
+                    const result = reader.result as string;
+                    // プレフィックスを削除
+                    const base64data = result.replace(/^data:image\/\w+;base64,/, '');
+                    try {
+                        console.log("base64data", base64data)
+                        console.log("postImage.type", postImage.type)
+                        const imageInformation = await sendImageToAPI(base64data, postImage.type);
+                        console.log(imageInformation);
+                    } catch (error) {
+                        console.error("sendImageToAPIでエラーが発生しました:", error);
+                    }
+                };
+                reader.readAsDataURL(postImage);
+            }
+*/
             const res = await fetch('/api/anthropic', {
                 method: 'POST',
                 headers: {
