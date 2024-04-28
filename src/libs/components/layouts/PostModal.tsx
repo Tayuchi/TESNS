@@ -50,31 +50,23 @@ const PostModal: React.FC<PostModalProps> = ({
     };
 
 
+    // DALL-Eからの画像URLをフェッチしてFirebase Storageにアップロードし、永続的なURLを取得する関数
+    async function saveImageToFirebase(imageUrl: string) {
+        const response = await fetch(imageUrl);
+        const blob = await response.blob(); // 画像データをBlobとして取得
+
+        const imageRef = ref(storage, `images/${new Date().getTime()}`); // Firebase Storageのパスを指定
+        const snapshot = await uploadBytes(imageRef, blob); // BlobをFirebase Storageにアップロード
+        const permanentUrl = await getDownloadURL(snapshot.ref); // 永続的なURLを取得
+
+        return permanentUrl;
+    }
 
     const handleSubmit = async () => {
         if (!user || !user.email) return;
         try {
             let imageUrl = '';
 
-            if (postImage) {
-                const reader = new FileReader();
-                reader.onloadend = async () => {
-                    const result = reader.result as string;
-                    // プレフィックスを削除
-                    const base64data = result.replace(/^data:image\/\w+;base64,/, '');
-                    try {
-                        console.log("base64data", base64data)
-                        console.log("postImage.type", postImage.type)
-                        const imageInformation = await sendImageToAPI(base64data, postImage.type);
-                        console.log(imageInformation);
-                        const generatedImage = await imageGenerate(imageInformation);
-                        console.log("Generated Image Data:", generatedImage);
-                    } catch (error) {
-                        console.error("sendImageToAPIでエラーが発生しました:", error);
-                    }
-                };
-                reader.readAsDataURL(postImage);
-            }
 
             const res = await fetch('/api/anthropic', {
                 method: 'POST',
@@ -94,9 +86,29 @@ const PostModal: React.FC<PostModalProps> = ({
                 const contentToSave = data.message;
 
                 if (postImage) {
+                    const reader = new FileReader();
+                    reader.onloadend = async () => {
+                        const result = reader.result as string;
+                        // プレフィックスを削除
+                        const base64data = result.replace(/^data:image\/\w+;base64,/, '');
+                        try {
+                            console.log("base64data", base64data)
+                            console.log("postImage.type", postImage.type)
+                            const imageInformation = await sendImageToAPI(base64data, postImage.type);
+                            console.log(imageInformation);
+                            const generatedImage = await imageGenerate(imageInformation);
+                            console.log("Generated Image Data:", generatedImage);
+                            imageUrl = await saveImageToFirebase(generatedImage);
+                        } catch (error) {
+                            console.error("sendImageToAPIでエラーが発生しました:", error);
+                        }
+                    };
+                    reader.readAsDataURL(postImage);
+                    /*
                     const imageRef = ref(storage, `images/${postImage.name}`);
                     const snapshot = await uploadBytes(imageRef, postImage);
                     imageUrl = await getDownloadURL(snapshot.ref);
+                    */
                 }
                 const newPostRef = doc(collection(firestore, 'posts'));
                 await setDoc(newPostRef, {
