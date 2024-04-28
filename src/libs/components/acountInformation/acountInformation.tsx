@@ -6,10 +6,6 @@ import { firestore, storage } from '../firebase/firebase';
 import { useSearchParams } from "next/navigation";
 import { TextField, Button, Card, CardContent, Typography, CardMedia } from '@mui/material';
 import Link from 'next/link';
-const getUserFromStorage = () => {
-    const userData = localStorage.getItem('user');
-    return userData ? JSON.parse(userData) : null;
-};
 export default function AccountInformation() {
 
     const [userId, setUserId] = useState('');
@@ -17,7 +13,6 @@ export default function AccountInformation() {
     const [profileImage, setProfileImage] = useState<File | null>(null);
     const [previewUrl, setPreviewUrl] = useState('');
     const [nickname, setNickname] = useState('');
-    const storedUser = localStorage.getItem('user');
     const [email, setEmail] = useState('');
     useEffect(() => {
         const storedUser = localStorage.getItem('user');
