@@ -55,7 +55,7 @@ const PostModal: React.FC<PostModalProps> = ({
         console.log("saveImageToFirebase started with URL:", imageUrl);  // 開始ログ
 
         try {
-            const response = await fetch(imageUrl, { mode: "cors" });
+            const response = await fetch(imageUrl, { mode: "no-cors" });
             console.log("Fetched image from URL:", response);  // レスポンスログ
             if (!response.ok) throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
 
