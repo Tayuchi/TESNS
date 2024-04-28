@@ -5,9 +5,6 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { storage, firestore } from '../firebase/firebase';
 import { User } from 'firebase/auth';
-
-import { imageGenerate } from '@/app/api/dalle3/route';
-import { uploadImageToServer } from '@/app/api/firebase/route';
 interface PostModalProps {
     open: boolean;
     handleClose: () => void;
@@ -49,6 +46,52 @@ const PostModal: React.FC<PostModalProps> = ({
             }
         }
     };
+    async function uploadImageToServer(imageUrl: string) {
+        try {
+            const response = await fetch('/api/firebase', {  // `/api/uploadImage`はサーバー側のAPIエンドポイントのパス
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ imageUrl })
+            });
+
+            const data = await response.json();  // サーバーからのレスポンスをJSON形式で受け取る
+
+            if (response.ok) {
+                console.log('Image uploaded successfully:', data.savedUrl);
+                return data.savedUrl;  // アップロードした画像の永続的なURLを返す
+            } else {
+                throw new Error(data.error || 'Failed to upload image');
+            }
+        } catch (error) {
+            console.error('Error uploading image:', error);
+        }
+    }
+    async function imageGenerate(prompt: string): Promise<string> {
+        console.log("prompt", prompt);
+        try {
+            const response = await fetch('/api/dalle3', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    str: prompt
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json(); // サーバーからのレスポンスをJSONとしてパース
+            return data.dalle3Url;
+        } catch (error) {
+            console.error("エラーが発生しました:", error);
+            throw new Error("API response processing failed.");
+        }
+    }
     async function sendImageToAPI(imageData: string, imageType: string): Promise<string> {
         console.log("base64data", imageData)
         console.log("postImage.type", imageType)

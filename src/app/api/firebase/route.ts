@@ -21,25 +21,3 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'An error occurred while processing your request' });
     }
 }
-export async function uploadImageToServer(imageUrl: string) {
-    try {
-        const response = await fetch('/api/firebase', {  // `/api/uploadImage`はサーバー側のAPIエンドポイントのパス
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ imageUrl })
-        });
-
-        const data = await response.json();  // サーバーからのレスポンスをJSON形式で受け取る
-
-        if (response.ok) {
-            console.log('Image uploaded successfully:', data.savedUrl);
-            return data.savedUrl;  // アップロードした画像の永続的なURLを返す
-        } else {
-            throw new Error(data.error || 'Failed to upload image');
-        }
-    } catch (error) {
-        console.error('Error uploading image:', error);
-    }
-}

@@ -30,27 +30,3 @@ export async function POST(req: Request) {
         return NextResponse.json({ error: 'An error occurred while processing your request' });
     }
 }
-export async function imageGenerate(prompt: string): Promise<string> {
-    console.log("prompt", prompt);
-    try {
-        const response = await fetch('/api/dalle3', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                str: prompt
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json(); // サーバーからのレスポンスをJSONとしてパース
-        return data.dalle3Url;
-    } catch (error) {
-        console.error("エラーが発生しました:", error);
-        throw new Error("API response processing failed.");
-    }
-}
