@@ -5,8 +5,8 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { storage, firestore } from '../firebase/firebase';
 import { User } from 'firebase/auth';
-
-
+import { sendImageToAPI } from '@/app/api/anthropicPicture/route';
+import { imageGenerate } from '@/app/api/dalle3/route';
 interface PostModalProps {
     open: boolean;
     handleClose: () => void;
@@ -48,37 +48,14 @@ const PostModal: React.FC<PostModalProps> = ({
             }
         }
     };
-    async function sendImageToAPI(imageData: string, imageType: string): Promise<void> {
-        console.log("base64data", imageData)
-        console.log("postImage.type", imageType)
-        try {
-            const response = await fetch('/api/anthropicPicture', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    image1_media_type: imageType, // 画像のメディアタイプ（例: 'image/jpeg'）
-                    image1_data: imageData // Base64エンコードされた画像データ
-                })
-            });
 
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
 
-            const data = await response.json(); // サーバーからのレスポンスをJSONとしてパース
-            return data.message;
-        } catch (error) {
-            console.error("エラーが発生しました:", error);
-        }
-    }
 
     const handleSubmit = async () => {
         if (!user || !user.email) return;
         try {
             let imageUrl = '';
-            /* コメントを外したら画像に対する文章を生成してくれるようになる 
+
             if (postImage) {
                 const reader = new FileReader();
                 reader.onloadend = async () => {
@@ -90,13 +67,15 @@ const PostModal: React.FC<PostModalProps> = ({
                         console.log("postImage.type", postImage.type)
                         const imageInformation = await sendImageToAPI(base64data, postImage.type);
                         console.log(imageInformation);
+                        const generatedImage = await imageGenerate(imageInformation);
+                        console.log("Generated Image Data:", generatedImage);
                     } catch (error) {
                         console.error("sendImageToAPIでエラーが発生しました:", error);
                     }
                 };
                 reader.readAsDataURL(postImage);
             }
-*/
+
             const res = await fetch('/api/anthropic', {
                 method: 'POST',
                 headers: {
