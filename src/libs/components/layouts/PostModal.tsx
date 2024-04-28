@@ -109,17 +109,32 @@ const PostModal: React.FC<PostModalProps> = ({
                     const snapshot = await uploadBytes(imageRef, postImage);
                     imageUrl = await getDownloadURL(snapshot.ref);
                     */
+
+                    const newPostRef = doc(collection(firestore, 'posts'));
+                    await setDoc(newPostRef, {
+                        content: contentToSave,
+                        imageUrl: imageUrl,
+                        likes: 0,
+                        retweets: 0,
+                        replies: 0,
+                        email: user.email,
+                        timestamp: serverTimestamp()
+                    });
                 }
-                const newPostRef = doc(collection(firestore, 'posts'));
-                await setDoc(newPostRef, {
-                    content: contentToSave,
-                    imageUrl: imageUrl,
-                    likes: 0,
-                    retweets: 0,
-                    replies: 0,
-                    email: user.email,
-                    timestamp: serverTimestamp()
-                });
+                else {
+                    // 画像がない場合の処理
+                    const newPostRef = doc(collection(firestore, 'posts'));
+                    await setDoc(newPostRef, {
+                        content: postContent,
+                        imageUrl: '',  // 画像がない場合は空のURL
+                        likes: 0,
+                        retweets: 0,
+                        replies: 0,
+                        email: user.email,
+                        timestamp: serverTimestamp()
+                    });
+                }
+
             }
 
             setPostContent('');
