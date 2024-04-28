@@ -174,7 +174,7 @@ const PostModal: React.FC<PostModalProps> = ({
                     // No image case, just save the text
                     const newPostRef = doc(collection(firestore, 'posts'));
                     await setDoc(newPostRef, {
-                        content: postContent,
+                        content: contentToSave,
                         imageUrl: '',  // No image URL
                         likes: 0,
                         retweets: 0,
