@@ -2,10 +2,12 @@ import React from 'react';
 import { Box, ListItem, Button } from '@mui/material';
 
 const sidebarItems = [
-  { text: 'Posts', href: '/' },
+  { text: 'Posts', href: '/home/profile' },
+  /*
   { text: 'Replies', href: '/' },
   { text: 'Media', href: '/' },
   { text: 'Likes', href: '/' },
+  */
 ];
 
 export default function Nav() {

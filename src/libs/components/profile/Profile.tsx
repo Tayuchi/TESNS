@@ -4,7 +4,7 @@ import { Button, Card, Grid, IconButton, Link, Stack, Typography } from "@mui/ma
 import Image from "next/image";
 import Nav from "./nav";
 import { useEffect, useState } from 'react';
-import { doc, getDoc, collection, query, orderBy, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, collection, query, orderBy, onSnapshot, where } from 'firebase/firestore';
 import { firestore } from '../firebase/firebase';
 import twemoji from "twemoji";
 interface UserProfile {
@@ -75,7 +75,11 @@ export default function Profile() {
             }).catch(console.error);
 
             // ユーザーの投稿を取得
-            const q = query(collection(firestore, 'posts'), orderBy('timestamp', 'desc'));
+            const q = query(
+                collection(firestore, 'posts'),
+                where('email', '==', parsedUser.email),  // userEmailがユーザーのメールアドレスと一致するもののみ取得
+                orderBy('timestamp', 'desc')
+            );
             const unsubscribe = onSnapshot(q, (querySnapshot) => {
                 const postsData = querySnapshot.docs.map(doc => ({
                     id: doc.id,
@@ -86,8 +90,10 @@ export default function Profile() {
                     replies: doc.data().replies,
                     userEmail: doc.data().userEmail,
                 }) as PostData);
+                console.log(postsData)
                 setPosts(postsData);
             });
+
 
             return () => unsubscribe(); // コンポーネントのアンマウント時にリスナーを解除
         }
@@ -101,23 +107,15 @@ export default function Profile() {
         <>
             <Grid container alignItems="center">
                 <Grid item xs={12}>
-                    <Image
-                        src={hdPicSrc}
-                        width={1080}
-                        height={360}
-                        layout="responsive"
-                        objectFit="cover"
-                        alt=""
-                    />
                 </Grid>
                 <Grid item xs={3}>
                     <Image
                         src={icnSrc}
                         width={200}
                         height={200}
-                        layout="fixed"
+                        sizes="200px"
                         alt=""
-                        style={{ borderRadius: '100%', marginTop: '-50%' }}
+                        style={{ borderRadius: '100%' }}
                     />
                 </Grid>
                 <Grid item xs={7}></Grid>
@@ -153,13 +151,13 @@ export default function Profile() {
                     <Stack direction="row">
                         <div className="m-1">
                             {/* アカウントのアイコン */}
-                            <Image src={post.userData?.profileImage || ""} alt="" width={40} height={40} className='rounded-full' />
+                            <Image src={icnSrc || ""} alt="" width={40} height={40} className='rounded-full' />
                         </div>
                         <div>
                             <Stack direction="column">
                                 <div>
                                     {/* アカウント名 */}
-                                    <Link href="#" underline="hover" sx={{ color: "black", fontWeight: "bold" }}>{post.userData?.nickname}</Link>
+                                    <Link href="#" underline="hover" sx={{ color: "black", fontWeight: "bold" }}>{uName}</Link>
                                 </div>
                                 <div>
                                     {/* ポストの文章 */}
