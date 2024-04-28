@@ -5,7 +5,7 @@ import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { doc, setDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { storage, firestore } from '../firebase/firebase';
 import { User } from 'firebase/auth';
-import { sendImageToAPI } from '@/app/api/anthropicPicture/route';
+
 import { imageGenerate } from '@/app/api/dalle3/route';
 import { uploadImageToServer } from '@/app/api/firebase/route';
 interface PostModalProps {
@@ -49,7 +49,32 @@ const PostModal: React.FC<PostModalProps> = ({
             }
         }
     };
+    async function sendImageToAPI(imageData: string, imageType: string): Promise<string> {
+        console.log("base64data", imageData)
+        console.log("postImage.type", imageType)
+        try {
+            const response = await fetch('/api/anthropicPicture', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    image1_media_type: imageType,
+                    image1_data: imageData
+                })
+            });
 
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+
+            const data = await response.json();  // サーバーからのレスポンスをJSONとしてパース
+            return data.message;  // 応答からメッセージを返す
+        } catch (error) {
+            console.error("エラーが発生しました:", error);
+            throw new Error("API response processing failed.");
+        }
+    }
 
     const handleSubmit = async () => {
         if (!user || !user.email) return;
