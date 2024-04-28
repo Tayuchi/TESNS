@@ -22,7 +22,7 @@ export default function Home() {
           Parrotter
         </Typography>
         <Typography variant='subtitle1'>
-          絶対に炎上しないSNS
+          世界一社交的なSNS
         </Typography>
         <Link href="/home" passHref>
           <Button variant='contained' sx={{ mt: 5 }}> 
