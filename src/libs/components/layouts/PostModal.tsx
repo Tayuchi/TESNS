@@ -52,15 +52,33 @@ const PostModal: React.FC<PostModalProps> = ({
 
     // DALL-Eからの画像URLをフェッチしてFirebase Storageにアップロードし、永続的なURLを取得する関数
     async function saveImageToFirebase(imageUrl: string) {
-        const response = await fetch(imageUrl);
-        const blob = await response.blob(); // 画像データをBlobとして取得
+        console.log("saveImageToFirebase started with URL:", imageUrl);  // 開始ログ
 
-        const imageRef = ref(storage, `images/${new Date().getTime()}`); // Firebase Storageのパスを指定
-        const snapshot = await uploadBytes(imageRef, blob); // BlobをFirebase Storageにアップロード
-        const permanentUrl = await getDownloadURL(snapshot.ref); // 永続的なURLを取得
+        try {
+            const response = await fetch(imageUrl);
+            console.log("Fetched image from URL:", response);  // レスポンスログ
+            if (!response.ok) throw new Error(`Failed to fetch image from URL: ${response.statusText}`);
 
-        return permanentUrl;
+            const blob = await response.blob();  // 画像データをBlobとして取得
+            console.log("Converted response to Blob:", blob);  // Blob変換ログ
+            if (!blob) throw new Error("Failed to convert response to blob.");
+
+            const imageRef = ref(storage, `images/${new Date().getTime()}`);
+            console.log("Firebase Storage ref created:", imageRef);  // Storage refログ
+
+            const snapshot = await uploadBytes(imageRef, blob);  // BlobをFirebase Storageにアップロード
+            console.log("Uploaded Blob to Firebase Storage:", snapshot);  // アップロードログ
+            if (!snapshot) throw new Error("Failed to upload blob to Firebase Storage.");
+
+            const permanentUrl = await getDownloadURL(snapshot.ref);  // 永続的なURLを取得
+            console.log("Retrieved permanent URL from Firebase:", permanentUrl);  // 永続URL取得ログ
+            return permanentUrl;
+        } catch (error) {
+            console.error("Error in saveImageToFirebase:", error);
+            throw error;  // 再throwして呼び出し元でキャッチ可能にする
+        }
     }
+
 
     const handleSubmit = async () => {
         if (!user || !user.email) return;
@@ -98,7 +116,20 @@ const PostModal: React.FC<PostModalProps> = ({
                             console.log(imageInformation);
                             const generatedImage = await imageGenerate(imageInformation);
                             console.log("Generated Image Data:", generatedImage);
-                            imageUrl = await saveImageToFirebase(generatedImage);
+                            if (generatedImage) {
+                                try {
+                                    console.log("Generated Image Data:", generatedImage);
+                                    imageUrl = await saveImageToFirebase(generatedImage);
+                                } catch (error) {
+                                    console.error("Error saving image to Firebase:", error);
+                                    alert('画像を保存できませんでした。URLが正しいか確認してください。');
+                                    return;
+                                }
+                            } else {
+                                console.error("Generated image URL is invalid.");
+                                alert('生成された画像のURLが無効です。');
+                                return;
+                            }
                         } catch (error) {
                             console.error("sendImageToAPIでエラーが発生しました:", error);
                         }
@@ -134,13 +165,12 @@ const PostModal: React.FC<PostModalProps> = ({
                         timestamp: serverTimestamp()
                     });
                 }
-
             }
-
             setPostContent('');
             setImagePreview('');
             setPostImage(null);
             handleClose();
+
         } catch (error) {
             console.error("Error adding document: ", error);
         }
